@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import ReactGridLayout from 'react-grid-layout';
-import type { Layout } from 'react-grid-layout';
+import RGL from 'react-grid-layout';
+import type { Layout, LayoutItem } from 'react-grid-layout';
+
+// The bundled .d.mts types don't match the actual GridLayout API so we cast.
+// The component works correctly at runtime — this is a type declaration issue only.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ReactGridLayout = RGL as any;
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import WidgetShell from '@/components/widgets/WidgetShell';
@@ -13,10 +18,13 @@ import '@/styles/components/widget.scss';
 const COL_WIDTH = 84;
 const ROW_HEIGHT = 80;
 const GRID_MARGIN = 16;
-const SCROLL_ZONE = 80;   // px from edge to start auto-scroll
-const SCROLL_SPEED = 12;  // px per frame
+const SCROLL_ZONE = 80;
+const SCROLL_SPEED = 12;
 
-function toLayout(w: Widget): Layout {
+// LayoutItem = individual item { i, x, y, w, h }
+// Layout     = readonly LayoutItem[]  (what react-grid-layout passes to callbacks)
+
+function toLayoutItem(w: Widget): LayoutItem {
   return {
     i: w.id,
     x: w.position.x,
@@ -55,15 +63,12 @@ function renderContent(widget: Widget, onUpdateConfig: Props['onUpdateConfig']) 
 export default function WidgetGrid({ widgets, loading, onUpdatePosition, onUpdateConfig, onRemove }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(() => window.innerWidth);
-  const [localLayout, setLocalLayout] = useState<Layout[]>([]);
+  const [localLayout, setLocalLayout] = useState<LayoutItem[]>([]);
   const prevIdsRef = useRef(new Set<string>());
 
-  // Auto-scroll refs
   const scrollVelocity = useRef({ dx: 0, dy: 0 });
   const scrollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Measure the container. Re-runs when widgets appear for the first time
-  // (containerRef attaches after the loading/empty branches clear).
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -74,8 +79,6 @@ export default function WidgetGrid({ widgets, loading, onUpdatePosition, onUpdat
     return () => observer.disconnect();
   }, [loading, widgets.length]);
 
-  // Adaptive cols + width: only as wide as the rightmost widget + 3-col buffer,
-  // but always at least wide enough to fill the viewport.
   const { effectiveCols, gridWidth } = useMemo(() => {
     const rightmost = widgets.reduce((m, w) => Math.max(m, w.position.x + w.position.w), 0);
     const viewportCols = Math.max(
@@ -89,8 +92,6 @@ export default function WidgetGrid({ widgets, loading, onUpdatePosition, onUpdat
     };
   }, [widgets, containerWidth]);
 
-  // Sync localLayout only when widget IDs change (add / remove).
-  // Position updates are NOT re-synced from Firestore so drag/resize never reverts.
   useEffect(() => {
     const currentIds = new Set(widgets.map((w) => w.id));
     const added = widgets.filter((w) => !prevIdsRef.current.has(w.id));
@@ -99,16 +100,15 @@ export default function WidgetGrid({ widgets, loading, onUpdatePosition, onUpdat
     if (added.length === 0 && removedIds.length === 0) return;
     setLocalLayout((prev) => [
       ...prev.filter((l) => !removedIds.includes(l.i)),
-      ...added.map(toLayout),
+      ...added.map(toLayoutItem),
     ]);
   }, [widgets]);
 
-  // Fill gaps for widgets not yet in localLayout (first render after Firestore loads)
-  const effectiveLayout = useMemo(() => {
+  const effectiveLayout = useMemo((): LayoutItem[] => {
     const localIds = new Set(localLayout.map((l) => l.i));
     return [
       ...localLayout,
-      ...widgets.filter((w) => !localIds.has(w.id)).map(toLayout),
+      ...widgets.filter((w) => !localIds.has(w.id)).map(toLayoutItem),
     ];
   }, [localLayout, widgets]);
 
@@ -121,13 +121,13 @@ export default function WidgetGrid({ widgets, loading, onUpdatePosition, onUpdat
   }
 
   function handleDrag(
-    _layout: Layout[],
-    _old: Layout,
-    _new: Layout,
-    _placeholder: Layout,
-    e: MouseEvent,
+    _layout: Layout,
+    _old: LayoutItem | null,
+    _new: LayoutItem | null,
+    _placeholder: LayoutItem | null,
+    e: Event,
   ) {
-    const { clientX, clientY } = e;
+    const { clientX, clientY } = e as MouseEvent;
     const { innerWidth, innerHeight } = window;
     let dx = 0;
     let dy = 0;
@@ -148,9 +148,10 @@ export default function WidgetGrid({ widgets, loading, onUpdatePosition, onUpdat
     }
   }
 
-  function handleLayoutChange(newLayout: Layout[]) {
-    setLocalLayout(newLayout);
-    newLayout.forEach((item) => {
+  function handleLayoutChange(newLayout: Layout) {
+    const mutable = [...newLayout];
+    setLocalLayout(mutable);
+    mutable.forEach((item) => {
       const widget = widgets.find((w) => w.id === item.i);
       if (!widget) return;
       const p = widget.position;
@@ -160,7 +161,6 @@ export default function WidgetGrid({ widgets, loading, onUpdatePosition, onUpdat
     });
   }
 
-  // Always render the container div so the ResizeObserver always has a target.
   return (
     <div ref={containerRef} style={{ width: '100%' }}>
       {loading ? (
