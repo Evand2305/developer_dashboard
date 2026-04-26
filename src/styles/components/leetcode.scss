@@ -1,0 +1,293 @@
+@use '../mixins' as *;
+
+// ── Setup form ────────────────────────────────────────────────────────────────
+
+.lc-setup {
+  @include flex-center;
+  flex-direction: column;
+  gap: var(--space-md);
+  height: 100%;
+  padding: var(--space-md);
+  text-align: center;
+}
+
+.lc-setup-icon {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--accent-orange);
+  letter-spacing: -1px;
+}
+
+.lc-setup-text {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+.lc-setup-form {
+  display: flex;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 240px;
+}
+
+.lc-input {
+  flex: 1;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  padding: 6px var(--space-sm);
+  outline: none;
+  min-width: 0;
+
+  &:focus {
+    border-color: var(--accent-orange);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+.lc-btn {
+  background-color: var(--accent-orange);
+  color: #0d1117;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  padding: 6px var(--space-md);
+  cursor: pointer;
+  transition: filter var(--transition-fast);
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.lc-btn-ghost {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  padding: 6px var(--space-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--border-color-hover);
+    color: var(--text-primary);
+  }
+}
+
+// ── State (loading / error) ───────────────────────────────────────────────────
+
+.lc-state {
+  @include flex-center;
+  flex-direction: column;
+  gap: var(--space-md);
+  height: 100%;
+  padding: var(--space-md);
+  text-align: center;
+}
+
+.lc-state-text {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+.lc-state-hint {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  max-width: 200px;
+}
+
+.lc-state-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.lc-error-text {
+  font-size: var(--font-sm);
+  color: var(--accent-red);
+}
+
+// ── Stats view ────────────────────────────────────────────────────────────────
+
+.lc-widget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: var(--space-md);
+}
+
+.lc-header {
+  @include flex-between;
+  flex-shrink: 0;
+}
+
+.lc-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.lc-username {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  @include truncate;
+}
+
+.lc-ranking {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
+.lc-header-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.lc-icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--font-md);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+
+  &:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+  }
+}
+
+.lc-total {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.lc-total-num {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.lc-total-label {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+}
+
+// ── Difficulty bars ───────────────────────────────────────────────────────────
+
+.lc-diff-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.lc-diff-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 52px;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.lc-diff-label {
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+
+.lc-diff-bar {
+  height: 6px;
+  background-color: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.lc-diff-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.lc-diff-count {
+  font-size: var(--font-xs);
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.lc-diff-total {
+  color: var(--text-muted);
+}
+
+// ── Recent submissions ────────────────────────────────────────────────────────
+
+.lc-submissions {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-height: 0;
+}
+
+.lc-section-label {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.lc-sub-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lc-sub-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+
+  &:hover {
+    background-color: var(--bg-tertiary);
+  }
+}
+
+.lc-sub-title {
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  @include truncate;
+}
+
+.lc-sub-meta {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}

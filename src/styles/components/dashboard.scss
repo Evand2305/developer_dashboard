@@ -1,0 +1,144 @@
+@use '../mixins' as *;
+
+.dashboard-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+// Header
+.dashboard-header {
+  @include flex-between;
+  padding: 0 var(--space-lg);
+  height: 56px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+}
+
+.dashboard-logo {
+  font-size: var(--font-md);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.logo-accent {
+  color: var(--accent-green);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.btn-add-widget {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 5px var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  font-family: var(--font-mono);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+  }
+}
+
+// User menu
+.user-menu {
+  position: relative;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--accent-green);
+  color: #0d1117;
+  font-weight: 700;
+  font-size: var(--font-sm);
+  @include flex-center;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  border: none;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-sm));
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  min-width: 210px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.user-info {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-name {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.user-email {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  @include truncate;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: var(--border-color);
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-sm);
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  &.danger:hover {
+    color: var(--accent-red);
+  }
+}
+
+// Main content area — no overflow clipping so the page scrolls in both
+// directions, which lets react-draggable track positions correctly.
+.dashboard-main {
+  padding: var(--space-lg);
+  padding-top: calc(56px + var(--space-lg));
+}

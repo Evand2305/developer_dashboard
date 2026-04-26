@@ -1,0 +1,166 @@
+@use '../mixins' as *;
+
+.auth-page {
+  min-height: 100vh;
+  @include flex-center;
+  background-color: var(--bg-primary);
+  padding: var(--space-md);
+}
+
+.auth-card {
+  @include card;
+  width: 100%;
+  max-width: 420px;
+  padding: var(--space-2xl);
+
+  @include sm {
+    padding: var(--space-lg);
+  }
+}
+
+.auth-logo {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+  letter-spacing: -0.5px;
+
+  span {
+    color: var(--accent-green);
+  }
+}
+
+.auth-subtitle {
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  margin-bottom: var(--space-xl);
+}
+
+// Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 10px var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  width: 100%;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background-color: var(--accent-green);
+  color: #0d1117;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
+}
+
+.btn-github {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+
+  &:hover:not(:disabled) {
+    border-color: var(--border-color-hover);
+    background-color: var(--border-color);
+  }
+}
+
+// Form
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+
+  label {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+  }
+
+  input {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    padding: 10px var(--space-md);
+    outline: none;
+    transition: border-color var(--transition-fast);
+
+    &::placeholder {
+      color: var(--text-muted);
+    }
+
+    &:focus {
+      border-color: var(--accent-blue);
+    }
+  }
+}
+
+.auth-error {
+  font-size: var(--font-sm);
+  color: var(--accent-red);
+  margin-top: calc(var(--space-xs) * -1);
+}
+
+// Divider
+.auth-divider {
+  @include flex-between;
+  gap: var(--space-md);
+  margin: var(--space-md) 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--border-color);
+  }
+
+  span {
+    color: var(--text-muted);
+    font-size: var(--font-sm);
+  }
+}
+
+// Toggle link
+.auth-toggle {
+  text-align: center;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-md);
+
+  button {
+    color: var(--accent-blue);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.github-btn-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}

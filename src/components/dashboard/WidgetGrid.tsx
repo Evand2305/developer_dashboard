@@ -1,0 +1,199 @@
+import { useState, useEffect, useRef, useMemo } from 'react';
+import ReactGridLayout from 'react-grid-layout';
+import type { Layout } from 'react-grid-layout';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+import WidgetShell from '@/components/widgets/WidgetShell';
+import GitHubWidget from '@/components/widgets/github/GitHubWidget';
+import LeetCodeWidget from '@/components/widgets/leetcode/LeetCodeWidget';
+import NotesWidget from '@/components/widgets/notes/NotesWidget';
+import type { Widget, WidgetPosition } from '@/types/widget';
+import '@/styles/components/widget.scss';
+
+const COL_WIDTH = 84;
+const ROW_HEIGHT = 80;
+const GRID_MARGIN = 16;
+const SCROLL_ZONE = 80;   // px from edge to start auto-scroll
+const SCROLL_SPEED = 12;  // px per frame
+
+function toLayout(w: Widget): Layout {
+  return {
+    i: w.id,
+    x: w.position.x,
+    y: w.position.y,
+    w: w.position.w,
+    h: w.position.h,
+    minW: 1,
+    minH: 2,
+  };
+}
+
+interface Props {
+  widgets: Widget[];
+  loading: boolean;
+  onUpdatePosition: (id: string, position: WidgetPosition) => void;
+  onUpdateConfig: (id: string, config: Record<string, unknown>) => Promise<void>;
+  onRemove: (id: string) => Promise<void>;
+}
+
+function renderContent(widget: Widget, onUpdateConfig: Props['onUpdateConfig']) {
+  switch (widget.type) {
+    case 'github':
+      return <GitHubWidget />;
+    case 'leetcode':
+      return (
+        <LeetCodeWidget
+          config={widget.config}
+          onSaveConfig={(cfg) => onUpdateConfig(widget.id, cfg)}
+        />
+      );
+    case 'notes':
+      return <NotesWidget />;
+  }
+}
+
+export default function WidgetGrid({ widgets, loading, onUpdatePosition, onUpdateConfig, onRemove }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(() => window.innerWidth);
+  const [localLayout, setLocalLayout] = useState<Layout[]>([]);
+  const prevIdsRef = useRef(new Set<string>());
+
+  // Auto-scroll refs
+  const scrollVelocity = useRef({ dx: 0, dy: 0 });
+  const scrollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Measure the container. Re-runs when widgets appear for the first time
+  // (containerRef attaches after the loading/empty branches clear).
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      setContainerWidth(entries[0].contentRect.width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loading, widgets.length]);
+
+  // Adaptive cols + width: only as wide as the rightmost widget + 3-col buffer,
+  // but always at least wide enough to fill the viewport.
+  const { effectiveCols, gridWidth } = useMemo(() => {
+    const rightmost = widgets.reduce((m, w) => Math.max(m, w.position.x + w.position.w), 0);
+    const viewportCols = Math.max(
+      Math.floor((containerWidth - GRID_MARGIN) / (COL_WIDTH + GRID_MARGIN)),
+      6,
+    );
+    const cols = Math.max(rightmost + 3, viewportCols);
+    return {
+      effectiveCols: cols,
+      gridWidth: COL_WIDTH * cols + GRID_MARGIN * (cols + 1),
+    };
+  }, [widgets, containerWidth]);
+
+  // Sync localLayout only when widget IDs change (add / remove).
+  // Position updates are NOT re-synced from Firestore so drag/resize never reverts.
+  useEffect(() => {
+    const currentIds = new Set(widgets.map((w) => w.id));
+    const added = widgets.filter((w) => !prevIdsRef.current.has(w.id));
+    const removedIds = [...prevIdsRef.current].filter((id) => !currentIds.has(id));
+    prevIdsRef.current = currentIds;
+    if (added.length === 0 && removedIds.length === 0) return;
+    setLocalLayout((prev) => [
+      ...prev.filter((l) => !removedIds.includes(l.i)),
+      ...added.map(toLayout),
+    ]);
+  }, [widgets]);
+
+  // Fill gaps for widgets not yet in localLayout (first render after Firestore loads)
+  const effectiveLayout = useMemo(() => {
+    const localIds = new Set(localLayout.map((l) => l.i));
+    return [
+      ...localLayout,
+      ...widgets.filter((w) => !localIds.has(w.id)).map(toLayout),
+    ];
+  }, [localLayout, widgets]);
+
+  function stopAutoScroll() {
+    if (scrollInterval.current) {
+      clearInterval(scrollInterval.current);
+      scrollInterval.current = null;
+    }
+    scrollVelocity.current = { dx: 0, dy: 0 };
+  }
+
+  function handleDrag(
+    _layout: Layout[],
+    _old: Layout,
+    _new: Layout,
+    _placeholder: Layout,
+    e: MouseEvent,
+  ) {
+    const { clientX, clientY } = e;
+    const { innerWidth, innerHeight } = window;
+    let dx = 0;
+    let dy = 0;
+    if (clientX > innerWidth - SCROLL_ZONE)  dx =  SCROLL_SPEED;
+    else if (clientX < SCROLL_ZONE)          dx = -SCROLL_SPEED;
+    if (clientY > innerHeight - SCROLL_ZONE) dy =  SCROLL_SPEED;
+    else if (clientY < SCROLL_ZONE)          dy = -SCROLL_SPEED;
+
+    scrollVelocity.current = { dx, dy };
+
+    if ((dx !== 0 || dy !== 0) && !scrollInterval.current) {
+      scrollInterval.current = setInterval(() => {
+        const { dx: vx, dy: vy } = scrollVelocity.current;
+        if (vx !== 0 || vy !== 0) window.scrollBy(vx, vy);
+      }, 16);
+    } else if (dx === 0 && dy === 0) {
+      stopAutoScroll();
+    }
+  }
+
+  function handleLayoutChange(newLayout: Layout[]) {
+    setLocalLayout(newLayout);
+    newLayout.forEach((item) => {
+      const widget = widgets.find((w) => w.id === item.i);
+      if (!widget) return;
+      const p = widget.position;
+      if (p.x !== item.x || p.y !== item.y || p.w !== item.w || p.h !== item.h) {
+        onUpdatePosition(item.i, { x: item.x, y: item.y, w: item.w, h: item.h });
+      }
+    });
+  }
+
+  // Always render the container div so the ResizeObserver always has a target.
+  return (
+    <div ref={containerRef} style={{ width: '100%' }}>
+      {loading ? (
+        <div className="grid-loading">Loading widgets...</div>
+      ) : widgets.length === 0 ? (
+        <div className="grid-empty">
+          <p>No widgets yet — click <strong>+ Add Widget</strong> to get started.</p>
+        </div>
+      ) : (
+        <ReactGridLayout
+          className="widget-grid"
+          layout={effectiveLayout}
+          cols={effectiveCols}
+          rowHeight={ROW_HEIGHT}
+          width={gridWidth}
+          compactType={null}
+          preventCollision={false}
+          onLayoutChange={handleLayoutChange}
+          onDrag={handleDrag}
+          onDragStop={stopAutoScroll}
+          draggableHandle=".widget-drag-handle"
+          draggableCancel=".widget-content"
+          margin={[GRID_MARGIN, GRID_MARGIN]}
+        >
+          {widgets.map((widget) => (
+            <div key={widget.id}>
+              <WidgetShell widget={widget} onRemove={() => onRemove(widget.id)}>
+                {renderContent(widget, onUpdateConfig)}
+              </WidgetShell>
+            </div>
+          ))}
+        </ReactGridLayout>
+      )}
+    </div>
+  );
+}
