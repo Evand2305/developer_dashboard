@@ -98,6 +98,39 @@
   font-size: var(--font-sm);
 }
 
+// ── Minimized bar ─────────────────────────────────────────────────────────────
+
+.minimized-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.minimized-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+  }
+}
+
+.minimized-chip-icon {
+  font-size: var(--font-xs);
+}
+
 // react-grid-layout overrides
 .react-grid-item.react-grid-placeholder {
   background-color: var(--accent-blue) !important;

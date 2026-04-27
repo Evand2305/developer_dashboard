@@ -5,9 +5,10 @@ import { signOut } from '@/services/firebase/auth';
 
 interface Props {
   onAddWidget: () => void;
+  onReset: () => void;
 }
 
-export default function DashboardHeader({ onAddWidget }: Props) {
+export default function DashboardHeader({ onAddWidget, onReset }: Props) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,8 +37,19 @@ export default function DashboardHeader({ onAddWidget }: Props) {
 
   return (
     <header className="dashboard-header">
+      <div className="header-left">
+        <button
+          className="btn-reset-widgets"
+          onClick={onReset}
+          title="Reset all widgets to default size and position"
+          aria-label="Reset widgets"
+        >
+          Reset Widgets
+        </button>
+      </div>
+
       <span className="dashboard-logo">
-        dev<span className="logo-accent">.</span>dash
+        developer<span className="logo-accent">-</span>board
       </span>
 
       <div className="header-actions">

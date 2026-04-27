@@ -95,6 +95,18 @@ export function useWidgets() {
     savePosition(user.uid, id, position);
   }
 
+  async function batchUpdatePositions(updates: { id: string; position: WidgetPosition }[]) {
+    if (!user) return;
+    await Promise.all(
+      updates.map(({ id, position }) =>
+        updateDoc(doc(db, 'users', user.uid, 'widgets', id), {
+          position,
+          updatedAt: serverTimestamp(),
+        }),
+      ),
+    );
+  }
+
   async function updateWidgetConfig(id: string, config: Record<string, unknown>) {
     if (!user) return;
     await updateDoc(doc(db, 'users', user.uid, 'widgets', id), {
@@ -108,5 +120,51 @@ export function useWidgets() {
     await deleteDoc(doc(db, 'users', user.uid, 'widgets', id));
   }
 
-  return { widgets, loading, addWidget, updateWidgetPosition, updateWidgetConfig, removeWidget };
+  async function resetWidgets() {
+    if (!user) return;
+
+    // Sort by creation time so widgets land in the order they were added
+    const sorted = [...widgets].sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+    );
+
+    const placed: { position: { x: number; y: number; w: number; h: number } }[] = [];
+
+    await Promise.all(
+      sorted.map((widget) => {
+        const { w, h } = DEFAULT_SIZE[widget.type];
+        const position = findOpenPosition(
+          placed as unknown as Widget[],
+          w,
+          h,
+        );
+        const newPosition = { x: position.x, y: position.y, w, h };
+        placed.push({ position: newPosition });
+
+        // Strip minimize state but keep user-entered data (e.g. leetcodeUsername)
+        const newConfig: Record<string, unknown> = Object.fromEntries(
+          Object.entries(widget.config).filter(
+            ([key]) => !['minimized', 'savedH', 'savedPosition'].includes(key),
+          ),
+        );
+
+        return updateDoc(doc(db, 'users', user.uid, 'widgets', widget.id), {
+          position: newPosition,
+          config: newConfig,
+          updatedAt: serverTimestamp(),
+        });
+      }),
+    );
+  }
+
+  return {
+    widgets,
+    loading,
+    addWidget,
+    updateWidgetPosition,
+    batchUpdatePositions,
+    updateWidgetConfig,
+    resetWidgets,
+    removeWidget,
+  };
 }

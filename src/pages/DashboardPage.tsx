@@ -7,15 +7,32 @@ import '@/styles/components/dashboard.scss';
 
 export default function DashboardPage() {
   const [addWidgetOpen, setAddWidgetOpen] = useState(false);
-  const { widgets, loading, addWidget, updateWidgetPosition, updateWidgetConfig, removeWidget } = useWidgets();
+  const [gridKey, setGridKey] = useState(0);
+  const {
+    widgets,
+    loading,
+    addWidget,
+    updateWidgetPosition,
+    batchUpdatePositions,
+    updateWidgetConfig,
+    resetWidgets,
+    removeWidget,
+  } = useWidgets();
+
+  async function handleReset() {
+    await resetWidgets();
+    setGridKey((k) => k + 1);
+  }
 
   return (
-    <DashboardShell onAddWidget={() => setAddWidgetOpen(true)}>
+    <DashboardShell onAddWidget={() => setAddWidgetOpen(true)} onReset={handleReset}>
       <WidgetGrid
+        key={gridKey}
         widgets={widgets}
         loading={loading}
         onUpdatePosition={updateWidgetPosition}
         onUpdateConfig={updateWidgetConfig}
+        onBatchUpdatePositions={batchUpdatePositions}
         onRemove={removeWidget}
       />
       <AddWidgetModal

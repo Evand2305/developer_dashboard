@@ -8,7 +8,9 @@
 
 // Header
 .dashboard-header {
-  @include flex-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   padding: 0 var(--space-lg);
   height: 56px;
   background-color: var(--bg-secondary);
@@ -35,6 +37,29 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  justify-content: flex-end;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.btn-reset-widgets {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 5px var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  font-family: var(--font-mono);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+  }
 }
 
 .btn-add-widget {
