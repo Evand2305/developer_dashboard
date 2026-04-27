@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import '@/styles/components/calculator.scss';
 
-const OPS = ['+', '−', '×', '÷'];
 
 function compute(a: number, op: string, b: number): number {
   switch (op) {
