@@ -20,8 +20,10 @@ function describeEvent(event: GitHubEvent): string {
   const p = event.payload;
   switch (event.type) {
     case 'PushEvent': {
-      const n = (p.commits as unknown[])?.length ?? 0;
-      return `Pushed ${n} commit${n !== 1 ? 's' : ''}`;
+      const branch = (p.ref as string | undefined)?.replace('refs/heads/', '') ?? '';
+      const n = (p.size as number | undefined) ?? (p.commits as unknown[] | undefined)?.length;
+      if (n && n > 0) return `Pushed ${n} commit${n !== 1 ? 's' : ''} to ${branch}`;
+      return `Pushed to ${branch || 'branch'}`;
     }
     case 'PullRequestEvent': {
       const pr = p.pull_request as { number: number };

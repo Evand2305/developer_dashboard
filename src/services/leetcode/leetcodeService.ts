@@ -74,7 +74,7 @@ class FaisalLeetCodeProvider implements LeetCodeProvider {
   async getRecentSubmissions(username: string, limit = 10): Promise<LeetCodeSubmission[]> {
     try {
       const res = await fetch(
-        `${this.subBase}/recentAcSubmissions/${encodeURIComponent(username)}/${limit}`,
+        `${this.subBase}/recentAcSubmissions?username=${encodeURIComponent(username)}&limit=${limit}`,
       );
       if (!res.ok) return [];
       const data = await res.json() as {

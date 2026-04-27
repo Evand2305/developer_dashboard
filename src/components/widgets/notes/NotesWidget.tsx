@@ -28,7 +28,10 @@ function NoteList({ notes, onSelect, onNew }: ListProps) {
       </div>
 
       {notes.length === 0 ? (
-        <div className="notes-empty">No notes yet — click <strong>+ New</strong> to start.</div>
+        <div className="notes-empty">
+          <span>No notes yet.</span>
+          <span>Click &ldquo;+ New&rdquo; to get started.</span>
+        </div>
       ) : (
         <ul className="notes-items">
           {notes.map((note) => (
