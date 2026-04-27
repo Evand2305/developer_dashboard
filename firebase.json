@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "developer-board",
     "public": "dist",
     "ignore": [
       "firebase.json",
