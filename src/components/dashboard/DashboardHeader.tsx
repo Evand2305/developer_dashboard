@@ -1,7 +1,11 @@
+// Sticky header with three sections (3-column grid):
+//   Left  — Reset Widgets button
+//   Center — app logo
+//   Right  — Add Widget button + user avatar/dropdown menu
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { signOut } from '@/services/firebase/auth';
+import { useAuth }  from '@/contexts/AuthContext';
+import { signOut }  from '@/services/firebase/auth';
 
 interface Props {
   onAddWidget: () => void;
@@ -10,16 +14,15 @@ interface Props {
 
 export default function DashboardHeader({ onAddWidget, onReset }: Props) {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  // Close the user dropdown whenever the user clicks outside it.
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node))
         setMenuOpen(false);
-      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -30,6 +33,7 @@ export default function DashboardHeader({ onAddWidget, onReset }: Props) {
     navigate('/login');
   }
 
+  // Show first letter of display name, then email, then '?' as fallback.
   const initials =
     user?.displayName?.[0]?.toUpperCase() ??
     user?.email?.[0]?.toUpperCase() ??
@@ -38,12 +42,8 @@ export default function DashboardHeader({ onAddWidget, onReset }: Props) {
   return (
     <header className="dashboard-header">
       <div className="header-left">
-        <button
-          className="btn-reset-widgets"
-          onClick={onReset}
-          title="Reset all widgets to default size and position"
-          aria-label="Reset widgets"
-        >
+        <button className="btn-reset-widgets" onClick={onReset}
+          title="Reset all widgets to default size and position" aria-label="Reset widgets">
           Reset Widgets
         </button>
       </div>
@@ -53,17 +53,11 @@ export default function DashboardHeader({ onAddWidget, onReset }: Props) {
       </span>
 
       <div className="header-actions">
-        <button className="btn-add-widget" onClick={onAddWidget}>
-          + Add Widget
-        </button>
+        <button className="btn-add-widget" onClick={onAddWidget}>+ Add Widget</button>
 
         <div className="user-menu" ref={menuRef}>
-          <button
-            className="user-avatar"
-            onClick={() => setMenuOpen((prev) => !prev)}
-            aria-label="User menu"
-            aria-expanded={menuOpen}
-          >
+          <button className="user-avatar" onClick={() => setMenuOpen((prev) => !prev)}
+            aria-label="User menu" aria-expanded={menuOpen}>
             {initials}
           </button>
 
@@ -74,9 +68,7 @@ export default function DashboardHeader({ onAddWidget, onReset }: Props) {
                 <span className="user-email">{user?.email}</span>
               </div>
               <div className="dropdown-divider" />
-              <button className="dropdown-item danger" onClick={handleSignOut}>
-                Sign out
-              </button>
+              <button className="dropdown-item danger" onClick={handleSignOut}>Sign out</button>
             </div>
           )}
         </div>

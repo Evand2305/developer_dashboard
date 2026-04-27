@@ -1,3 +1,12 @@
+// Core dashboard grid. Key responsibilities:
+//   • Renders active widgets via react-grid-layout (drag, resize, free placement).
+//   • Shows minimized widgets as chips in a bar above the grid; handles minimize/restore
+//     with automatic shifting of widgets below.
+//   • Maintains localLayout in React state so drag/resize feedback is instant while
+//     Firestore writes are debounced or batched in the background.
+//   • restoredItemRef guards restored widgets from react-grid-layout clamping their
+//     size/position before the correct values propagate.
+//   • Auto-scrolls the page when dragging near viewport edges.
 import { useState, useEffect, useRef, useMemo } from 'react';
 import RGL from 'react-grid-layout';
 import type { Layout, LayoutItem } from 'react-grid-layout';
@@ -7,6 +16,12 @@ import WidgetShell, { WIDGET_TITLES } from '@/components/widgets/WidgetShell';
 import GitHubWidget from '@/components/widgets/github/GitHubWidget';
 import LeetCodeWidget from '@/components/widgets/leetcode/LeetCodeWidget';
 import NotesWidget from '@/components/widgets/notes/NotesWidget';
+import CalculatorWidget from '@/components/widgets/calculator/CalculatorWidget';
+import ConverterWidget from '@/components/widgets/converter/ConverterWidget';
+import ColorCodeWidget from '@/components/widgets/colorcode/ColorCodeWidget';
+import QuickLinksWidget from '@/components/widgets/quicklinks/QuickLinksWidget';
+import StopwatchWidget from '@/components/widgets/stopwatch/StopwatchWidget';
+import TodoWidget from '@/components/widgets/todo/TodoWidget';
 import type { Widget, WidgetPosition } from '@/types/widget';
 import '@/styles/components/widget.scss';
 
@@ -33,7 +48,7 @@ function toLayoutItem(w: Widget): LayoutItem {
 
 function renderContent(widget: Widget, onUpdateConfig: Props['onUpdateConfig']) {
   switch (widget.type) {
-    case 'github': return <GitHubWidget />;
+    case 'github':     return <GitHubWidget />;
     case 'leetcode':
       return (
         <LeetCodeWidget
@@ -41,7 +56,25 @@ function renderContent(widget: Widget, onUpdateConfig: Props['onUpdateConfig']) 
           onSaveConfig={(cfg) => onUpdateConfig(widget.id, cfg)}
         />
       );
-    case 'notes': return <NotesWidget />;
+    case 'notes':      return <NotesWidget />;
+    case 'calculator': return <CalculatorWidget />;
+    case 'converter':  return <ConverterWidget />;
+    case 'colorcode':  return <ColorCodeWidget />;
+    case 'quicklinks':
+      return (
+        <QuickLinksWidget
+          config={widget.config}
+          onSaveConfig={(cfg) => onUpdateConfig(widget.id, cfg)}
+        />
+      );
+    case 'stopwatch': return <StopwatchWidget />;
+    case 'todo':
+      return (
+        <TodoWidget
+          config={widget.config}
+          onSaveConfig={(cfg) => onUpdateConfig(widget.id, cfg)}
+        />
+      );
   }
 }
 

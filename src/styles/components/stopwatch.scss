@@ -1,0 +1,85 @@
+@use '../mixins' as *;
+
+.sw-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  height: 100%;
+}
+
+.sw-display {
+  font-size: 2.4rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  padding: var(--space-sm) 0;
+}
+
+.sw-controls {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.sw-btn {
+  padding: 8px var(--space-xl);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: filter var(--transition-fast);
+  min-width: 80px;
+
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
+  &:hover:not(:disabled) { filter: brightness(1.15); }
+}
+
+.sw-btn--start     { background-color: var(--accent-green);  color: #0d1117; }
+.sw-btn--stop      { background-color: var(--accent-red);    color: #0d1117; }
+.sw-btn--secondary { background-color: var(--bg-tertiary);   color: var(--text-primary); border: 1px solid var(--border-color); }
+
+.sw-laps {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 1px solid var(--border-color);
+}
+
+.sw-laps-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sw-laps-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sw-lap {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr;
+  gap: var(--space-sm);
+  padding: 5px var(--space-sm);
+  font-size: var(--font-sm);
+  font-family: var(--font-mono);
+  border-bottom: 1px solid var(--border-color);
+
+  &:last-child { border-bottom: none; }
+  &:first-child { color: var(--accent-green); }
+}
+
+.sw-lap-num    { color: var(--text-muted); }
+.sw-lap-split  { color: var(--text-primary); }
+.sw-lap-total  { color: var(--text-secondary); }

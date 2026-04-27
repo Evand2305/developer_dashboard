@@ -1,3 +1,5 @@
+// Provides the current Firebase user and loading state to the entire app via
+// React context. Any component can call useAuth() instead of querying Firebase directly.
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -12,9 +14,11 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue>({ user: null, loading: true });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser]       = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Subscribe to Firebase's auth state. Sets loading=false once Firebase
+  // confirms whether a session exists, preventing a flash of the login page.
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);

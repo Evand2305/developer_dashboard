@@ -1,3 +1,4 @@
+// Layout wrapper: renders the fixed header and the scrollable main content area.
 import type { ReactNode } from 'react';
 import DashboardHeader from './DashboardHeader';
 

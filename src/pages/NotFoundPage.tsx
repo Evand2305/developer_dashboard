@@ -1,3 +1,4 @@
+// Shown for any URL that doesn't match a defined route.
 import { useNavigate } from 'react-router-dom';
 import '@/styles/pages/not-found.scss';
 
